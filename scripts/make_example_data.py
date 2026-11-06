@@ -2,9 +2,8 @@
 
     python scripts/make_example_data.py
 
-* trading_days.csv  every calendar date, open or closed. Sessions run Saturday to Wednesday,
-                    as on the Tehran Stock Exchange, minus a synthetic holiday list built from
-                    approximate Iranian public holidays. It is not an official calendar.
+* trading_days.csv  every calendar date, open or closed. Sessions run Monday to Friday,
+                    minus a small synthetic holiday list. It is not an official calendar.
 * daily_returns.csv one made-up portfolio's daily TWR (decimals), with two sessions the upstream
                     service marked not_computed.
 * tbill_ytm.csv     made-up annual Treasury-bill YTM quotes in percent, one per session, with one
@@ -21,25 +20,13 @@ from pathlib import Path
 
 SEED = 7
 CAL_START, CAL_END = date(2024, 3, 1), date(2026, 10, 10)
-FIRST_RETURN, LAST_RETURN = date(2024, 5, 4), date(2026, 9, 30)
-NOT_COMPUTED = {date(2026, 2, 8), date(2026, 2, 9)}
-MISSING_RF = {date(2025, 3, 8)}
-
-# Approximate solar-calendar holidays (month, day) and a lunar list for 2024 that moves
-# about 11 days earlier each year. Synthetic, for examples only.
-SOLAR = [(2, 10), (3, 19), (3, 20), (3, 21), (3, 22), (3, 23), (3, 24), (4, 1), (4, 2), (6, 3), (6, 4)]
-LUNAR_2024 = [date(2024, 2, 25), date(2024, 4, 1), date(2024, 4, 10), date(2024, 4, 11), date(2024, 5, 4),
-              date(2024, 6, 17), date(2024, 6, 25), date(2024, 7, 15), date(2024, 7, 16), date(2024, 8, 25),
-              date(2024, 9, 2), date(2024, 9, 4), date(2024, 9, 12), date(2024, 9, 21), date(2024, 12, 4),
-              date(2024, 1, 14), date(2024, 1, 28)]
-
+FIRST_RETURN, LAST_RETURN = date(2024, 5, 6), date(2026, 9, 30)
+NOT_COMPUTED = {date(2026, 2, 9), date(2026, 2, 10)}
+MISSING_RF = {date(2025, 3, 10)}
 
 def holidays() -> set[date]:
-    out = set()
-    for year in range(2024, 2027):
-        out |= {date(year, m, d) for m, d in SOLAR}
-        out |= {d.replace(year=year) - timedelta(days=11 * (year - 2024)) for d in LUNAR_2024}
-    return out
+    return {date(year, month, day) for year in range(2024, 2027)
+            for month, day in [(1, 1), (12, 25), (12, 26)]}
 
 
 def main() -> None:
@@ -51,7 +38,7 @@ def main() -> None:
     calendar, sessions = [], []
     d = CAL_START
     while d <= CAL_END:
-        is_open = d.weekday() in (5, 6, 0, 1, 2) and d not in closed_days
+        is_open = d.weekday() < 5 and d not in closed_days
         calendar.append((d, "open" if is_open else "closed"))
         if is_open:
             sessions.append(d)

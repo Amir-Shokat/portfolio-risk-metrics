@@ -18,8 +18,8 @@ aligned observations inside the selected window, `A = 250` the daily annualisati
 
 ## Risk-free return
 
-The market quotes the risk-free rate as the annual yield to maturity (YTM) of government
-Treasury bills (in Iran, Islamic Treasury Bills). Each session gets
+The input quotes the risk-free rate as the annual yield to maturity (YTM) of government
+Treasury bills. Each session gets
 
 ```
 rf_t = (1 + YTM_t) ** (1 / 250) - 1
@@ -27,7 +27,7 @@ rf_t = (1 + YTM_t) ** (1 / 250) - 1
 
 * 250 is a fixed number of periods per year, the same as the volatility factor. It is not
   the number of calendar days.
-* One value per session. A Saturday after a two-day closure gets one session of
+* One value per session. A Monday after a two-day closure gets one session of
   risk-free return, not three calendar days (an earlier ACT/365 draft did this).
 * The quote of the same session is used. A missing quote is never replaced by zero, by
   yesterday's quote or by today's rate (see [data-and-calendar.md](data-and-calendar.md)).
@@ -80,8 +80,8 @@ Points that matter:
   reconciliation check.
 * The factor is fixed. It is not the user's number of observations and not the actual
   number of sessions in a year. No adjustment for serial correlation is applied; daily
-  price limits spread news over several days, so short-horizon volatility on this market
-  is understated. This is recorded as a known limitation, not hidden.
+  market microstructure can spread news over several days, so short-horizon volatility may
+  be understated. This is recorded as a known limitation, not hidden.
 
 ## Weekly ratios (policy `weekly-ratios-v1`, publication pending)
 
@@ -96,7 +96,7 @@ Sortino_w = mean(x_w) / sqrt(sum(min(x_w, 0)^2) / N_w) * sqrt(52)
 `F_w` compounds the daily values; it is not `(1 + YTM) ** (1/52) - 1`. 52 is a scaling
 factor, not a minimum number of weeks. The week boundary, partial weeks at the edges and the
 minimum history are open decisions, so these ratios are computed as diagnostics and
-published as `POLICY_PENDING`. The code uses a Saturday-to-Friday week as an example only.
+published as `POLICY_PENDING`. The code uses a Monday-to-Sunday week as an example only.
 
 ## Extensions (not in the approved first-release set)
 

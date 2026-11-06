@@ -78,13 +78,14 @@ def test_result_key_requires_input_revisions():
                         {"twr": "a", "calendar": "b", "rf": "c"})
 
 
-def test_last_n_lookback_reaches_250_when_the_year_is_short(examples):
+def test_last_n_lookback_reaches_250_when_the_window_is_short(examples):
     inputs = load_inputs(examples / "daily_returns.csv", examples / "trading_days.csv",
                          examples / "tbill_ytm.csv", examples / "market_index.csv")
-    window = assess(inputs, "1Y")
-    assert window["sharpe"].n == 240 and window["sharpe"].status is Status.INSUFFICIENT_HISTORY
-    last_n = assess(inputs, "1Y", ratio_lookback="last_n")
-    assert last_n["sharpe"].n == 250 and last_n["sharpe"].status is Status.OK
+    window = assess(inputs, "6M")
+    assert window["sharpe"].n == 132 and window["sharpe"].status is Status.NOT_OFFERED
+    last_n = assess(inputs, "6M", ratio_lookback="last_n")
+    assert last_n["sharpe"].n == 250 and last_n["sharpe"].status is Status.NOT_OFFERED
+    assert last_n["sharpe"].diagnostic is not None
     assert "RATIO_LOOKBACK_LAST_N" in last_n["sharpe"].reasons
 
 
@@ -93,12 +94,12 @@ def test_example_regression(examples):
     inputs = load_inputs(examples / "daily_returns.csv", examples / "trading_days.csv",
                          examples / "tbill_ytm.csv", examples / "market_index.csv")
     r = assess(inputs, "1Y")
-    assert r.window.coverage() == {"official_sessions": 242, "valid_observations": 240, "not_computed": 2,
-                                   "missing": 0, "rf_aligned": 240, "sessions_before_first_return": 0}
-    assert r["max_drawdown"].value == pytest.approx(-0.20306, abs=1e-5)
-    assert r["volatility"].value == pytest.approx(0.20810, abs=1e-5)
-    assert r["recovery_sessions"].value == 37
-    assert r["var_95"].value == pytest.approx(0.0181)
+    assert r.window.coverage() == {"official_sessions": 258, "valid_observations": 256, "not_computed": 2,
+                                   "missing": 0, "rf_aligned": 256, "sessions_before_first_return": 0}
+    assert r["max_drawdown"].value == pytest.approx(-0.13863, abs=1e-5)
+    assert r["volatility"].value == pytest.approx(0.17629, abs=1e-5)
+    assert r["recovery_sessions"].value == 25
+    assert r["var_95"].value == pytest.approx(0.015806)
     # the March 2025 quote is missing: a past window that contains it blocks rf metrics only
     past = assess(inputs, "1Y", as_of=date(2025, 6, 30))
     assert past["downside_deviation"].reasons == ("MISSING_RF_RETURN",)
@@ -118,7 +119,7 @@ def test_cli_table_and_json(examples, capsys):
     assert main(_args(examples, "--horizon", "1y", "--json", "--diagnostics")) == 0
     payload = json.loads(capsys.readouterr().out)
     sharpe = next(x for x in payload["metrics"] if x["metric"] == "sharpe")
-    assert sharpe["value"] is None and sharpe["diagnostic"] is not None
+    assert sharpe["value"] is not None and sharpe["diagnostic"] is not None
 
 
 def test_cli_input_error_exit_code(tmp_path, examples, capsys):

@@ -15,6 +15,11 @@ source code or a statement of deployed behaviour. Financial policies and thresho
 repository are local demonstration choices. No production scale, release outcome or
 organizational approval is claimed.
 
+**Portfolio analytics chain.** [Portfolio Data Quality](https://github.com/Amir-Shokat/portfolio-data-quality)
+validates upstream evidence, the [Portfolio Return Engine](https://github.com/Amir-Shokat/portfolio-return-engine)
+produces the daily TWR used here, and [Return Monitoring](https://github.com/Amir-Shokat/return-monitoring)
+supervises production completeness and anomalies.
+
 ## What's inside
 
 | Module | Contents |
@@ -59,32 +64,31 @@ One year of the synthetic portfolio (no dependencies beyond the standard library
 Portfolio risk report  |  methodology 1.3  |  contract 619440776d24
 policies: history=single-gate-v1  ratio_history=250obs-v1  downside=rf-target-v1  recovery=1.1-window-bound-session-count  weekly=weekly-ratios-v1  extensions=toolkit-ext-v1
 horizon 1Y: sessions after 2025-09-30 up to 2026-09-30  (current window)
-official sessions 242  valid 240  not computed 2  missing 0  rf aligned 240
+official sessions 258  valid 256  not computed 2  missing 0  rf aligned 256
 
 metric                   value  status                      n  short  reasons
 -----------------------------------------------------------------------------
-cumulative_twr          46.09%  OK                        240
-max_drawdown           -20.31%  OK                        240
-current_drawdown        -3.50%  OK                        240
-recovery_sessions           37  OK                        240
-volatility              20.81%  OK                        240
-downside_deviation      13.86%  OK                        240    124
-sharpe                       -  INSUFFICIENT_HISTORY      240         MIN_OBSERVATIONS_NOT_MET
-sortino                      -  INSUFFICIENT_HISTORY      240    124  MIN_OBSERVATIONS_NOT_MET
-sharpe_weekly                -  POLICY_PENDING             52         PARTIAL_WEEKS_EXCLUDED, WEEKLY_POLICY_PENDING
-sortino_weekly               -  POLICY_PENDING             52     23  PARTIAL_WEEKS_EXCLUDED, WEEKLY_POLICY_PENDING
-var_95                   1.81%  OK                        240         EXTENSION_METRIC
-es_95                    2.61%  OK                        240         EXTENSION_METRIC
-beta                      0.93  OK                        240         EXTENSION_METRIC
+cumulative_twr          74.28%  OK                        256
+max_drawdown           -13.86%  OK                        256
+current_drawdown        -3.25%  OK                        256
+recovery_sessions           25  OK                        256
+volatility              17.63%  OK                        256
+downside_deviation      11.35%  OK                        256    114
+sharpe                    1.65  OK                        256
+sortino                   2.56  OK                        256    114
+sharpe_weekly                -  POLICY_PENDING             51         WEEKLY_POLICY_PENDING
+sortino_weekly               -  POLICY_PENDING             51     21  WEEKLY_POLICY_PENDING
+var_95                   1.58%  OK                        256         EXTENSION_METRIC
+es_95                    2.13%  OK                        256         EXTENSION_METRIC
+beta                      0.90  OK                        256         EXTENSION_METRIC
 ```
 
-The year has only 242 sessions, so a 12-month window can never reach the 250-observation
-ratio gate. That conflict was a real open question; here it is visible instead of hidden.
-With `--ratio-lookback last_n` the ratios use the latest 250 valid sessions:
+The ratio lookback policy is explicit. With `--ratio-lookback last_n`, ratios use the latest
+250 valid sessions instead of silently changing the selected horizon:
 
 ```
-sharpe                    0.86  OK                        250         RATIO_LOOKBACK_LAST_N
-sortino                   1.29  OK                        250    126  RATIO_LOOKBACK_LAST_N
+sharpe                    1.65  OK                        250         RATIO_LOOKBACK_LAST_N
+sortino                   2.56  OK                        250    111  RATIO_LOOKBACK_LAST_N
 ```
 
 <p><img src="docs/drawdown_recovery.png" width="49%"> <img src="docs/status_matrix.png" width="49%"></p>

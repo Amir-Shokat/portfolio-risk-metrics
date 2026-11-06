@@ -12,6 +12,6 @@ code, so nothing is invented silently, and a consequence if it stays open.
 | Q5 | Total loss, full exit and re-funding of an account (capital episodes) | -100% is `POLICY_PENDING`; one series = one episode | Risk after a restart mixes two different investments |
 | Q6 | A materiality rule for tiny but non-zero denominators | only exact zero is undefined | A nearly flat portfolio can show an extreme ratio |
 | Q7 | Quality thresholds for stale prices, runs of zero returns and extreme returns | extreme values kept and reported | Illiquid holdings make volatility look low |
-| Q8 | Official week definition, partial weeks and minimum weekly history | Saturday-to-Friday example, partial weeks excluded, `POLICY_PENDING` | Weekly ratios cannot be published |
+| Q8 | Official week definition, partial weeks and minimum weekly history | Monday-to-Sunday example, partial weeks excluded, `POLICY_PENDING` | Weekly ratios cannot be published |
 | Q9 | Drawdown display sign and precision | stored signed (<= 0), decimals | Front-end and API may round or sign differently |
 | Q10 | Adjustment for serial correlation caused by daily price limits | none, documented | Short-horizon volatility is understated |

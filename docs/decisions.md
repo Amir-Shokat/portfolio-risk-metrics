@@ -7,7 +7,7 @@ Decisions made while defining the risk measures, rewritten without internal refe
 |---|---|---|---|---|
 | D1 | 2026-10 (early) | The package takes daily cash-flow-adjusted TWR as input and does not rebuild it | Risk should describe the portfolio, not deposit timing; one owner per number | input contract |
 | D2 | 2026-10 (early) | Fixed annualisation factor 250 for volatility, downside, Sharpe and Sortino, regardless of horizon or the user's row count | Users with different histories must be comparable; the factor is a convention, not a sample size | 1.2 |
-| D3 | 2026-10 (early) | Risk-free return from Treasury-bill YTM: `(1 + YTM) ** (1/250) - 1` per session; no calendar-day accrual | Matches the factor in D2; an ACT/365 draft gave a Saturday three days of interest | 1.2 |
+| D3 | 2026-10 (early) | Risk-free return from Treasury-bill YTM: `(1 + YTM) ** (1/250) - 1` per session; no calendar-day accrual | Matches the factor in D2; an ACT/365 draft gave a Monday three days of interest | 1.2 |
 | D4 | 2026-10 (early) | Missing returns block the window; `not_computed` sessions are excluded and reported; holidays are not padded | A zero is a claim about the portfolio; silence about a gap hides risk | input contract |
 | D5 | 2026-10-25 | Recovery is searched only inside the selected window; later data cannot rewrite a past window | A past period's answer must be stable; otherwise support cannot explain a screenshot | recovery 1.0 |
 | D6 | 2026-10-25 | Sharpe and Sortino need 250 aligned observations; the 365-elapsed-day condition is removed | The day count added nothing once observations were counted, and blocked active users | 250obs-v1 |

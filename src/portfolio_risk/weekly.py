@@ -14,8 +14,8 @@ built by compounding those daily values, never by ``(1 + YTM) ** (1/52) - 1``.
 What was *not* approved: the official week boundary, what to do with partial weeks at
 the window edges, and minimum numbers of weeks and weekly shortfalls. 52 is a scaling
 factor, not a minimum history. Until those decisions exist, weekly ratios are computed as
-diagnostics and published as ``POLICY_PENDING``. This module uses a Saturday-to-Friday
-week (the Tehran market trades Saturday to Wednesday) as an *example* plan, excludes
+diagnostics and published as ``POLICY_PENDING``. This module uses a Monday-to-Sunday
+week as an example plan, excludes
 partial weeks from the diagnostic and reports them; it never pads a closed week with a
 zero observation.
 """
@@ -40,12 +40,12 @@ class Week:
     complete: bool                  # every official session of the calendar week is inside the window
 
 
-def week_start_of(d: date, week_start: str = "saturday") -> date:
+def week_start_of(d: date, week_start: str = "monday") -> date:
     return d - timedelta(days=(d.weekday() - WEEKDAYS[week_start]) % 7)
 
 
 def plan_weeks(window_sessions: Sequence[date], all_sessions: Sequence[date], opening: date, end: date,
-               week_start: str = "saturday") -> list[Week]:
+               week_start: str = "monday") -> list[Week]:
     """Group the window's sessions into calendar weeks and mark edge weeks as partial."""
     groups: "OrderedDict[date, list[date]]" = OrderedDict()
     for s in window_sessions:

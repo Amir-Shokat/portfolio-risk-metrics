@@ -85,7 +85,7 @@
       "version": "weekly-ratios-v1",
       "weekly_return": "prod(1 + r_t) - 1 over the week's valid sessions",
       "weekly_rf": "prod(1 + rf_t) - 1 over exactly the same sessions",
-      "week_start": "saturday",
+      "week_start": "monday",
       "week_start_status": "example only; the official week definition is an open decision",
       "partial_weeks": "policy_pending; excluded from diagnostics and reported",
       "min_weeks": null,

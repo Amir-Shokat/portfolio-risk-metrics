@@ -1,7 +1,7 @@
 """Risk-free returns from Treasury-bill yield quotes.
 
 The market quotes the risk-free rate as an *annual yield to maturity* (YTM) of government
-Treasury bills (in Iran, Islamic Treasury Bills). Sharpe, Sortino and downside deviation
+Treasury bills. Sharpe, Sortino and downside deviation
 need a risk-free *return per session*, aligned with each daily portfolio return.
 
 Convention (methodology 1.2 onwards)::
@@ -10,7 +10,7 @@ Convention (methodology 1.2 onwards)::
 
 * 250 is the fixed number of trading periods per year, the same factor used to
   annualise volatility. It is not the number of calendar days.
-* A Saturday return that follows a two-day closure still receives one session of
+* A Monday return that follows a two-day closure still receives one session of
   risk-free return, not three days of calendar accrual (an earlier ACT/365 draft did that).
 * Each session uses the quote of that same session. A missing quote is never filled with
   zero, with yesterday's quote, or with today's rate.
