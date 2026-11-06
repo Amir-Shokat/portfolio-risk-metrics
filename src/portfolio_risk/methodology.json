@@ -1,0 +1,115 @@
+{
+  "methodology_version": "1.3",
+  "status": "reference implementation of the project methodology; not a production release",
+  "effective_date": "2026-10-27",
+  "supersedes": ["1.2", "1.1", "1.0"],
+
+  "inputs": {
+    "return_basis": "daily simple cash-flow-adjusted time-weighted return (TWR), supplied by the upstream return service",
+    "return_unit": "decimal",
+    "one_series_is_one_capital_episode": true,
+    "not_computed_sessions": "exclude_and_report",
+    "missing_sessions": "block_window",
+    "holiday_padding": false,
+    "extreme_returns": "retain_and_flag_for_review",
+    "total_loss_return_minus_one": "policy_pending"
+  },
+
+  "annualization": {
+    "daily": 250,
+    "weekly": 52,
+    "rule": "multiply the periodic statistic by sqrt(factor); the factor is fixed and never the user's observation count",
+    "serial_dependence_adjustment": "none"
+  },
+
+  "risk_free": {
+    "quote": "historical daily-average annual yield to maturity of government Treasury bills",
+    "periods_per_year": 250,
+    "conversion": "rf_t = (1 + ytm_t) ** (1 / 250) - 1, one value per official session",
+    "calendar_day_accrual": false,
+    "date_matching": "exact session date; no forward fill, no zero fill, no current rate applied to the past",
+    "accepted_units": ["decimal", "percent"]
+  },
+
+  "horizons": {"1M": 1, "3M": 3, "6M": 6, "1Y": 12},
+  "window_rule": "official sessions in (as_of minus N calendar months, as_of]; the opening wealth point sits on the boundary",
+  "ratio_lookback": "window",
+
+  "metrics": {
+    "cumulative_twr":     {"horizons": ["1M", "3M", "6M", "1Y"], "min_obs": 1,   "unit": "decimal"},
+    "max_drawdown":       {"horizons": ["1M", "3M", "6M", "1Y"], "min_obs": 20,  "unit": "decimal"},
+    "current_drawdown":   {"horizons": ["1M", "3M", "6M", "1Y"], "min_obs": 20,  "unit": "decimal"},
+    "recovery_sessions":  {"horizons": ["1M", "3M", "6M", "1Y"], "min_obs": 20,  "unit": "sessions"},
+    "volatility":         {"horizons": ["1M", "3M", "6M", "1Y"], "min_obs": 30,  "unit": "decimal"},
+    "downside_deviation": {"horizons": ["3M", "6M", "1Y"],       "min_obs": 30,  "min_shortfalls": 30, "unit": "decimal"},
+    "sharpe":             {"horizons": ["1Y"],                   "min_obs": 250, "unit": "ratio"},
+    "sortino":            {"horizons": ["1Y"],                   "min_obs": 250, "min_shortfalls": 30, "unit": "ratio"},
+    "sharpe_weekly":      {"horizons": ["1M", "3M", "6M", "1Y"], "min_obs": null, "unit": "ratio", "publication": "policy_pending"},
+    "sortino_weekly":     {"horizons": ["1M", "3M", "6M", "1Y"], "min_obs": null, "min_shortfalls": null, "unit": "ratio", "publication": "policy_pending"},
+    "var_95":             {"horizons": ["6M", "1Y"],             "min_obs": 120, "unit": "decimal", "scope": "extension"},
+    "es_95":              {"horizons": ["6M", "1Y"],             "min_obs": 120, "unit": "decimal", "scope": "extension"},
+    "beta":               {"horizons": ["6M", "1Y"],             "min_obs": 120, "unit": "ratio", "scope": "extension"}
+  },
+
+  "policies": {
+    "history": {
+      "version": "single-gate-v1",
+      "rule": "one minimum per metric; no limited/standard quality tiers; counts come only from inside the selected window"
+    },
+    "ratio_history": {
+      "version": "250obs-v1",
+      "min_aligned_observations": 250,
+      "elapsed_days_gate": false
+    },
+    "downside": {
+      "version": "rf-target-v1",
+      "target": "historical risk-free return of the same session",
+      "shortfall": "min(r_t - rf_t, 0)",
+      "denominator": "all valid aligned observations (N), including those at or above the risk-free return",
+      "shortfall_count": "count(r_t < rf_t); equality is not a shortfall",
+      "shared_with": "sortino"
+    },
+    "recovery": {
+      "version": "1.1-window-bound-session-count",
+      "event": "maximum drawdown of the selected window",
+      "recovery_condition": "first wealth point at or above the reference peak",
+      "search_end": "window end, inclusive; data after the window is never used",
+      "unit": "official market sessions",
+      "interval": "(trough_date, recovery_date]",
+      "tie_rule": "earliest",
+      "tie_rule_status": "open decision; ties are flagged with TIE_RULE_APPLIED",
+      "label_historical_window": "not recovered by the end of this period",
+      "label_current_window": "not recovered as of the latest data"
+    },
+    "weekly": {
+      "version": "weekly-ratios-v1",
+      "weekly_return": "prod(1 + r_t) - 1 over the week's valid sessions",
+      "weekly_rf": "prod(1 + rf_t) - 1 over exactly the same sessions",
+      "week_start": "saturday",
+      "week_start_status": "example only; the official week definition is an open decision",
+      "partial_weeks": "policy_pending; excluded from diagnostics and reported",
+      "min_weeks": null,
+      "min_weekly_shortfalls": null,
+      "publication": "policy_pending"
+    }
+  },
+
+  "extensions": {
+    "version": "toolkit-ext-v1",
+    "note": "Not part of the approved first-release metric set. Conventions follow the original research proposal and are documented as toolkit choices.",
+    "var": {"confidence": 0.95, "horizon_sessions": 1, "method": "k worst returns, k = ceil(n * (1 - confidence)), no interpolation", "sign": "positive number = loss"},
+    "beta": {"formula": "cov(r - rf, m - rf) / var(m - rf)", "benchmark": "total market index return, exact session alignment"}
+  },
+
+  "open_decisions": [
+    "official calendar source, cutoff and exact window boundary rule",
+    "risk-free source field, unit, effective dating, gaps and revisions",
+    "tie-breaking between equal maximum drawdowns and repeated troughs",
+    "capital-episode rules: total loss, full exit and re-funding",
+    "materiality rule for tiny but non-zero ratio denominators",
+    "quality thresholds for stale prices, runs of zero returns and extreme returns",
+    "official week definition, partial weeks and weekly minimum history",
+    "drawdown display sign and display precision",
+    "how a 12-month window meets a 250-observation ratio gate in a market with about 240 sessions a year"
+  ]
+}
